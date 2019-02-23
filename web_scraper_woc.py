@@ -1,3 +1,5 @@
+#!usr/bin/python3
+#Daniel Jones
 from bs4 import BeautifulSoup
 import requests
 """BBC Coventry and Warwickshire Scrape"""
@@ -12,6 +14,7 @@ def get_top_story_bbc():
 	topStory.append(articleContents[0].text)
 	return topStory
 def get_updates_cusu():
+	"""Function to get the CUSU most recent updates and stories. Returns an array where each block of 4 elements are relative"""
 	events = []
 	times = []
 	locations = []
@@ -24,13 +27,13 @@ def get_updates_cusu():
 	eventLocations = cusuC.findAll('dd',{'class':'msl_event_location'})
 	eventDescriptions = cusuC.findAll('dd',{'class':'msl_event_description'})
 	for event in eventNames:
-		events.append(event.text)
+		events.append(event.text) #Titles
 	for date in eventDates:
-		times.append(date.text)
+		times.append(date.text) #Dates
 	for location in eventLocations:
-		locations.append(location.text)
+		locations.append(location.text) #Locations
 	for description in eventDescriptions:
-		descriptions.append(description.text)
+		descriptions.append(description.text) #Descriptions
 	for i in range(len(events)):
 		edata.append(events[i])
 		edata.append(times[i])
@@ -38,7 +41,8 @@ def get_updates_cusu():
 		edata.append(descriptions[i])
 	return edata
 if __name__ == '__main__':
-	#x = getTopStoryBBC()
+	bbcStory = get_top_story_bbc()
 	#print(' - '.join(x))
-	x = get_updates_cusu()
-	print(x)
+	cusuUpdate = get_updates_cusu()
+	print(bbcStory)
+	print(cusuUpdate)
