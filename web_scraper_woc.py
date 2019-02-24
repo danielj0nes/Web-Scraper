@@ -1,7 +1,10 @@
 #!usr/bin/python3
 #Daniel Jones
+#import sqlite3 #Possible sqlite3 conversion
+import json
 from bs4 import BeautifulSoup
 import requests
+import numpy
 """Functions to webscrape useful information from relevant target sites"""
 def get_top_story_bbc():
 	"""Function to get BBC's Coventry and Warwickshire top story. Returns an array of two elements where the first it the top story title and the second the contents"""
@@ -33,7 +36,9 @@ def get_updates_cusu():
 		edata.append(times[i])
 		edata.append(locations[i])
 		edata.append(descriptions[i])
-	return edata
+
+	x = numpy.array_split(numpy.array(edata),len(events))
+	return x
 def get_university_news():
 	"""Returns posts with links from the CUMoodle 'University News' section, returns an array where each block of 2 elements are relative"""
 	response = requests.get('https://cumoodle.coventry.ac.uk')
@@ -41,21 +46,30 @@ def get_university_news():
 	postLinks =[]
 	headings = []
 	edata = []
-	for link in moodleContent.findAll('div',{'class':'posting shortenedpost'}):
-		postLinks.append(link.a['href']) #Post links
 	for title in moodleContent.findAll('div',{'class':'subject'}):
 		headings.append(title.text) #Post titles
-	for i in range(len(headings)):
-		edata.append(headings[i])
-		edata.append(postLinks[i])
-	return edata
+	for link in moodleContent.findAll('div',{'class':'posting shortenedpost'}):
+		postLinks.append(link.a['href']) #Post links
+	if len(postLinks) == len(headings):
+		for i in range(len(headings)):
+			edata.append(headings[i])
+			edata.append(links[i])
+		return edata
+	else:
+		return postLinks + headings
 if __name__ == '__main__':
 	#Example usage
 	bbcStory = get_top_story_bbc()
 	cusuUpdate = get_updates_cusu()
 	moodleUpdate = get_university_news()
-	print(bbcStory)
-	print("\n")
-	print(cusuUpdate)
-	print("\n")
-	print(moodleUpdate)
+	with open('data.json', 'w') as fp:
+		json.dump(bbcStory, fp, indent=4)
+		json.dump(moodleUpdate, fp, indent=4)
+		for i in range(len(cusuUpdate)):
+			json.dump(cusuUpdate[i].tolist(), fp, indent=4)
+	"""conn = sqlite3.connect('webscraper.db') #Sql test
+				sql = conn.cursor()
+				sql.execute("INSERT INTO BBCTopStory (Article) VALUES (?)",[bbcStory])
+				conn.commit()
+				sql.close()
+				conn.close"""
