@@ -62,9 +62,9 @@ if __name__ == '__main__':
 	moodleUpdate = get_university_news()
 	with open('data.json', 'w') as fp:
 		json.dump(bbcStory, fp, indent=4)
-		json.dump(moodleUpdate, fp, indent=4)
 		for i in range(len(cusuUpdate)):
 			json.dump(cusuUpdate[i].tolist(), fp, indent=4)
+		json.dump(moodleUpdate, fp, indent=4)
 	"""conn = sqlite3.connect('webscraper.db') #Sql test
 				sql = conn.cursor()
 				sql.execute("INSERT INTO BBCTopStory (Article) VALUES (?)",[bbcStory])
