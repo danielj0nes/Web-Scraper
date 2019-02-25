@@ -44,19 +44,18 @@ def get_university_news():
 	response = requests.get('https://cumoodle.coventry.ac.uk')
 	moodleContent = BeautifulSoup(response.content, 'html.parser')
 	postLinks =[]
-	headings = []
-	edata = []
-	for title in moodleContent.findAll('div',{'class':'subject'}):
-		headings.append(title.text) #Post titles
+	#headings = []
+	#edata = []
+	"""for title in moodleContent.findAll('div',{'class':'subject'}):
+					headings.append(title.text) #Post titles"""
 	for link in moodleContent.findAll('div',{'class':'posting shortenedpost'}):
 		postLinks.append(link.a['href']) #Post links
-	if len(postLinks) == len(headings):
-		for i in range(len(headings)):
-			edata.append(headings[i])
-			edata.append(links[i])
-		return edata
-	else:
-		return postLinks + headings
+	"""if len(postLinks) == len(headings):
+					for i in range(len(headings)):
+						edata.append(headings[i])
+						edata.append(links[i])
+					return edata"""
+	return postLinks
 if __name__ == '__main__':
 	#Example usage
 	bbcStory = get_top_story_bbc()
