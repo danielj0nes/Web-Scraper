@@ -36,7 +36,6 @@ def get_updates_cusu():
 		edata.append(times[i])
 		edata.append(locations[i])
 		edata.append(descriptions[i])
-
 	x = numpy.array_split(numpy.array(edata),len(events))
 	return x
 def get_university_news():
