@@ -4,7 +4,9 @@
 import json
 from bs4 import BeautifulSoup
 import requests
-import numpy
+import datetime
+now = datetime.datetime.now()
+lastupdate = now.strftime("%d-%m-%Y %H:%M")
 """Functions to webscrape useful information from relevant target sites"""
 def get_top_story_bbc():
 	"""Function to get BBC's Coventry and Warwickshire top story. Returns an array of two elements where the first it the top story title and the second the contents"""
@@ -15,33 +17,29 @@ def get_top_story_bbc():
 	topStory.append(bbcContent.findAll('p', {'class' : 'skylark__summary'})[0].text)
 	return topStory
 def get_updates_cusu():
-	"""Function to get the CUSU most recent updates and stories. Returns an array where each block of 4 elements are relative"""
+	"""Function to get the CUSU most recent updates and stories"""
 	events = []
 	times = []
 	locations = []
 	descriptions = []
 	images = []
-	edata = []
+	data = ""
 	response = requests.get('https://www.cusu.org/coventry')
 	cusuContent = BeautifulSoup(response.content, 'html.parser')
 	for event in cusuContent.findAll('a',{'class':'msl_event_name'}):
-		events.append(event.text) #Titles
+		events.append("<p style='font-weight:bold;'>"+event.text+"</p>") #Titles
 	for date in cusuContent.findAll('dd',{'class':'msl_event_time'}):
-		times.append(date.text) #Dates
+		times.append("<li> When: "+date.text+"</li> <br />") #Dates
 	for location in cusuContent.findAll('dd',{'class':'msl_event_location'}):
-		locations.append(location.text) #Locations
+		locations.append("<li> Where: "+location.text+"</li> <br />") #Locations
 	for description in cusuContent.findAll('dd',{'class':'msl_event_description'}):
-		descriptions.append(description.text) #Descriptions
+		descriptions.append(description.text+"<br /> <br />") #Descriptions
 	for image in cusuContent.findAll('span',{'class':'msl_event_image'}):
-		images.append("https://www.cusu.org"+image.img['src']) #Image links
-	for i in range(len(events)):
-		edata.append(events[i])
-		edata.append(times[i])
-		edata.append(locations[i])
-		edata.append(descriptions[i])
-		edata.append(images[i])
-	x = numpy.array_split(numpy.array(edata),len(events))
-	return x
+		images.append("<img src = '"+"https://www.cusu.org"+image.img['src']+"' style='width:480px;height:270px;'> <br />") #Image links
+	results = zip(images,events,times,locations,descriptions)
+	for result in results:
+		data+=(' '.join(result))
+	return data
 def get_university_news():
 	"""Returns a string of posts with links and dates from the CUMoodle 'University News' section"""
 	response = requests.get('https://cumoodle.coventry.ac.uk')
@@ -51,23 +49,22 @@ def get_university_news():
 	dates = []
 	data = ""
 	for title in moodleContent.findAll('div',{'class':'subject'}):
-		headings.append(title.text+"</a>")
+		headings.append(title.text+"</a></p>")
 	for link in moodleContent.findAll('div',{'class':'link'}):
-		postLinks.append("<a href = '"+link.a['href']+"'>") #Post links
+		postLinks.append("<p style = 'font-size:120%;'> <a href = '"+link.a['href']+"'>") 
 	for date in moodleContent.findAll('div',{'class':'author'}):
-		dates.append(""+date.text[18:]+"<br/>")
+		dates.append("<p style='font-size:90%;'>"+date.text[18:]+"</p>")
 	results = zip(postLinks, headings, dates)
 	for result in results:
 		data+=(''.join(result))
-	print(data)
 	return data
 if __name__ == '__main__':
 	#Example usage
 	bbcStory = get_top_story_bbc()
 	cusuUpdate = get_updates_cusu()
 	moodleUpdate = get_university_news()
-	#print(moodleUpdate)
 	bbcStoryToWeb = ' - '.join(list(bbcStory))
+	
 	"""with open('data.json', 'w') as fp:
 					json.dump(bbcStory, fp, indent=4) 							#json incorporation
 					for i in range(len(cusuUpdate)):
@@ -116,24 +113,27 @@ if __name__ == '__main__':
                 <div class="content">
                     <header>
                         <h2 style="font-size:300%; text-align:center; font-style:bolder; font-weight:bolder;">Coventry's Latest News and Events</h2>
-                        <h4 style="font-size:125%; text-align:center; font-style:bolder; font-weight:bolder;">A collaboration of useful news specific to Coventry and Warwickshire</h4>
+                        <p style="text-align:center;">Last updated: {lastupdate}</p>
+                        
 						<hr>
                     </header>
-					<h6 style="font-size:200%; text-align:left; font-weight:bold;" > BBC Coventry & Warwickshire Top Story</h6>
-                     <p style="font-size:120%;">{bbcTop}</p>
+                    
+					<center>
+					<a href="https://www.bbc.co.uk/news/england/coventry_and_warwickshire"> <img class="responsive" src="images/bbcnews.png" alt="BBC Coventry and Warwickshire" style='width:380px;height:170px;'> </a> </center>
+                     <p style="font-size:120%; font-weight:bold;">{bbcTop}</p>
                     	<hr />
                     	
-                    <h6 style="font-size:200%; text-align:left; font-weight:bold;" >Student Union News</h6>
+                    <h6 style="font-size:200%; text-align:center; font-weight:bold;" >Student Union News</h6>
                   		
-                     <p style="font-size:120%;">placeholder</p>
+                     <ul><p style="font-size:120%;">{cusuUpdate}</p></ul>
 						<hr />
-					<h6 style="font-size:200%; text-align:left; font-weight:bold;" >Coventry University News</h6>
+					<h6 style="font-size:200%; text-align:center; font-weight:bold;" >Coventry University News</h6>
                   		
-                     <p style="font-size:120%;">{moodleUpdate}</p><br /><br />
+                     <ul>{moodleUpdate}</ul>
                      
                      
 						<hr />
-					<p>This page is powered by a Python script written and developed by Daniel Jones</p>
+					<a href="https://github.com/DanielJ0nes/Web-Scraper">This page is powered by a Python script written and developed by Daniel Jones</a>
                 </div>
                 
             </div>
@@ -174,10 +174,11 @@ add_chatinline(); </script>
 
     </body>
 </html>
-			'''.format(bbcTop=bbcStoryToWeb, moodleUpdate=moodleUpdate)		
+			'''.format(bbcTop=bbcStoryToWeb, moodleUpdate=moodleUpdate, cusuUpdate=cusuUpdate,lastupdate=lastupdate)		
 	with open('webscraper.html', 'w') as htmlPage:
 		htmlPage.write(webpage)				
 	htmlPage.close()
+	print("built")
 	"""conn = sqlite3.connect('webscraper.db') #Sql test
 				sql = conn.cursor()
 				sql.execute("INSERT INTO BBCTopStory (Article) VALUES (?)",[bbcStory])			#SQL incorporation
