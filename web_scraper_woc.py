@@ -48,14 +48,13 @@ def get_university_news():
 	headings = []
 	dates = []
 	data = ""
-	for title in moodleContent.findAll('div',{'class':'subject'}):
+	for title in moodleContent.findAll('div',{'class':'subject'}): #Grab story titles
 		headings.append(title.text+"</a></p>")
-	for link in moodleContent.findAll('div',{'class':'link'}):
+	for link in moodleContent.findAll('div',{'class':'link'}): #Grab links to extended stories; format them into HTML link syntax
 		postLinks.append("<p style = 'font-size:120%;'> <a href = '"+link.a['href']+"'>") 
 	for date in moodleContent.findAll('div',{'class':'author'}):
-		dates.append("<p style='font-size:90%;'>"+date.text[18:]+"</p>")
-	results = zip(postLinks, headings, dates)
-	for result in results:
+		dates.append("<p style='font-size:90%;'>"+date.text[18:]+"</p>") #Grab dates in desired format; exclude post author
+	for result in zip(postLinks, headings, dates): #Zip corresponding components together for iteration
 		data+=(''.join(result))
 	return data
 if __name__ == '__main__':
